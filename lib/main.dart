@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:todo_app/screens/home.dart';
 
 void main() {
@@ -10,7 +11,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //
+    SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     return MaterialApp(
+      // 開発中のSlow Modeバナーを非表示にする
+      debugShowCheckedModeBanner: false,
       title: 'ToDo App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
