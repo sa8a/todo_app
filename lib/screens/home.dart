@@ -187,15 +187,23 @@ class _HomeState extends State<Home> {
   }
 
   void _addToDoItem(String todo) {
-    setState(() {
-      todoList.add(
-        ToDo(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          todoText: todo,
-        ),
-      );
-    });
-    _todoController.clear();
+    // 保存するデータの定義（Map型のデータにて保存）
+    // createdAtはDateTime型をTimeStamp型に変換するため、
+    // このような処理を行っています。
+    final document = <String, dynamic>{
+      'id': 1,
+      'isDone': false,
+      'todoText': _todoController.text,
+      'createdAt': Timestamp.fromDate(DateTime.now()),
+    };
+
+    // Cloud Firestoreへのデータ保存
+    // collection : Firebaseで設定したコレクション名
+    // doc : 空欄にするとdocument IDを自動で設定
+    FirebaseFirestore.instance.collection('todo').doc().set(document);
+
+    // 送信したらフォームをクリアする
+    setState(_todoController.clear);
   }
 
   void _runFilter(String enteredKeyword) {
