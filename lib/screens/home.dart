@@ -38,7 +38,7 @@ class _HomeState extends State<Home> {
               children: [
                 searchBox(),
                 Expanded(
-                  child: ListView(
+                  child: Column(
                     children: [
                       Container(
                         margin: const EdgeInsets.only(
@@ -53,12 +53,55 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                       ),
-                      for (ToDo todo in _foundToDo.reversed)
-                        ToDoItem(
-                          todo: todo,
-                          onToDoChanged: _handleToDoChange,
-                          onDeleteItem: _deleteToDoItem,
-                        ),
+                      // for (ToDo todo in _foundToDo.reversed)
+                      //   ToDoItem(
+                      //     todo: todo,
+                      //     onToDoChanged: _handleToDoChange,
+                      //     onDeleteItem: _deleteToDoItem,
+                      //   ),
+                      StreamBuilder<QuerySnapshot>(
+                        // streamの設定部分で、前述したデータの取得処理を記載
+                        // Cloud FirestoreからStreamでデータを取得
+                        // FirebaseFirestore.instanceでCloud Firestoreのデータベースのインスタンスを取得します。
+                        // collection(~)でコレクションを選択
+                        // orderBy(~)でフィールドの値にて並べ替え
+                        // 最後にsnapshots()でStreamにてデータの取得を行う
+                        stream: FirebaseFirestore.instance
+                            .collection('todo')
+                            .orderBy('createdAt')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text('エラーが発生しました');
+                          }
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          final list = snapshot.requireData.docs
+                              .map<String>((DocumentSnapshot document) {
+                            final documentData =
+                                document.data()! as Map<String, dynamic>;
+                            return documentData['todoText']! as String;
+                          }).toList();
+
+                          final reverseList = list.reversed.toList();
+
+                          return Expanded(
+                            child: ListView.builder(
+                              itemCount: reverseList.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Center(
+                                  child: Text(
+                                    reverseList[index],
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 )
